@@ -18,13 +18,16 @@ day26-mcp/
 │   ├── weather_server.py
 │   └── weather_client.py
 │
-└── 03-production/           ← Bước 3: Auth, Tool Registry, Versioning
-    ├── README.md
-    ├── auth_server.py
-    ├── auth_client.py
-    ├── registry.json
-    ├── registry_client.py
-    └── versioned_server.py
+├── 03-production/           ← Bước 3: Auth, Tool Registry, Versioning
+│   ├── README.md
+│   ├── auth_server.py
+│   ├── auth_client.py
+│   ├── registry.json
+│   ├── registry_client.py
+│   ├── versioned_server.py
+│   └── versioned_client.py
+│
+└── 04-lab/                  ← Bước 4: ADK agent + remote MCP server
 ```
 
 ## Quick start
@@ -48,6 +51,11 @@ python auth_client.py              # terminal 2
 # Production — Tool Registry
 cd 03-production && python registry_client.py
 ```
+
+Các demo trong `01`–`03` dùng dependency ở thư mục gốc và MCP 2.x. Lab `04`
+có `pyproject.toml`/`uv.lock` riêng và pin MCP 1.x để tương thích với Google ADK;
+cài dependency bằng `uv sync` trong từng thư mục `04-lab/mcp-server` và
+`04-lab/mcp-client`.
 
 ---
 

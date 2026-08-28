@@ -33,7 +33,7 @@ ADK (Agent Development Kit) đóng vai trò **MCP Client**
 │     → nhận về: get_current_weather, get_forecast, health_check  │
 │                                                                 │
 │  3. TRUYỀN tools cho LLM (Gemini)                               │
-│     Agent(model="gemini-2.5-flash", tools=[weather_tools])      │
+│     Agent(model="gemini-3.6-flash", tools=[weather_tools])      │
 │     → Gemini biết nó có thể gọi 3 tools trên                    │
 │                                                                 │
 │  4. ĐIỀU PHỐI vòng lặp Function Calling                         │
@@ -50,6 +50,10 @@ So với bài 02 (viết client thủ công bằng `mcp.ClientSession`), ADK gi�
 
 ## Setup
 
+> The lab projects pin MCP 1.x because the current Google ADK release uses
+> `mcp.shared.session`. The root demos under `03-production` target MCP 2.x;
+> install each lab's dependencies with `uv sync` in its own directory.
+
 ### 1. MCP Server
 
 ```bash
@@ -57,6 +61,8 @@ cd mcp-server
 uv sync
 
 # Set your WeatherAPI key (get one free at https://weatherapi.com)
+# You can either export WEATHERAPI_KEY or create mcp-server/.env:
+# WEATHERAPI_KEY=your_weatherapi_key
 export WEATHERAPI_KEY="your_weatherapi_key"
 
 # Start the server (runs on port 8085 by default)

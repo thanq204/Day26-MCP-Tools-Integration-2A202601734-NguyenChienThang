@@ -75,6 +75,16 @@ def get_weather_v2(
         include_forecast: Có trả thêm dự báo 2 ngày tới không (mặc định: False)
         units: Đơn vị nhiệt độ — "celsius" hoặc "fahrenheit" (mặc định: celsius)
     """
+    if units not in {"celsius", "fahrenheit"}:
+        return json.dumps(
+            {
+                "city": city,
+                "error": "units phải là 'celsius' hoặc 'fahrenheit'",
+                "api_version": "2.0",
+            },
+            ensure_ascii=False,
+        )
+
     data = _MOCK_DB.get(city)
     if not data:
         return json.dumps(

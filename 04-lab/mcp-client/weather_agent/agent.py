@@ -2,6 +2,8 @@
 Weather Agent - Connects to Remote MCP Server on Cloud Run
 Successfully connects to custom MCP HTTP endpoints!
 """
+import os
+
 from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset, StreamableHTTPConnectionParams
 import logging
@@ -10,7 +12,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MCP_SERVER_URL = "http://localhost:8085/mcp"
+MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8085/mcp")
+MCP_SERVER_TIMEOUT = float(os.getenv("MCP_SERVER_TIMEOUT", "30"))
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 logger.info(f"🌐 Initializing weather agent with remote MCP server")
 logger.info(f"📡 MCP Server: {MCP_SERVER_URL}")
@@ -19,7 +23,7 @@ try:
     # Create connection parameters for the remote MCP server
     connection_params = StreamableHTTPConnectionParams(
         url=MCP_SERVER_URL,
-        timeout=30.0,  # Increased timeout for Cloud Run cold starts
+        timeout=MCP_SERVER_TIMEOUT,
     )
     
     # Create the MCP toolset - this will connect to the remote server
@@ -32,7 +36,7 @@ try:
     # Create the agent with remote MCP tools
     root_agent = Agent(
         name="weather_agent",
-        model="gemini-2.5-flash",
+        model=MODEL,
         tools=[weather_tools],
     )
     logger.info("✅ Weather agent initialized with remote MCP tools:")
@@ -51,6 +55,6 @@ except Exception as e:
     logger.warning("⚠️  Creating fallback agent without MCP tools")
     root_agent = Agent(
         name="weather_agent",
-        model="gemini-2.5-flash",
+        model=MODEL,
     )
 

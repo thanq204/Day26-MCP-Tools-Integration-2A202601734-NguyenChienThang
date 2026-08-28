@@ -13,7 +13,7 @@
 | File | Vấn đề | Mô tả |
 |---|---|---|
 | `auth_server.py` | Auth | MCP server qua HTTP + `TokenVerifier` kiểm tra bearer token |
-| `auth_client.py` | Auth | Client gửi token qua `httpx.AsyncClient` |
+| `auth_client.py` | Auth | Client gửi token qua `httpx2.AsyncClient` (MCP 2.x) |
 | `registry.json` | Discovery | Tool Registry — danh mục tool-centric, agent tìm theo tag/keyword |
 | `registry_client.py` | Discovery | Agent tra cứu registry, chọn best match, tự kết nối |
 | `versioned_server.py` | Versioning | Server v2: giữ tool v1 (deprecated) + thêm v2 + resource metadata |

@@ -1,6 +1,6 @@
 """MCP Client có Authentication — kết nối tới auth_server.py qua HTTP.
 
-Client truyền bearer token thông qua httpx.AsyncClient. MCP SDK tự gắn
+Client truyền bearer token thông qua httpx2.AsyncClient. MCP SDK tự gắn
 token vào mọi request HTTP (POST, GET, DELETE) tới server.
 
 Cách chạy (cần auth_server.py đang chạy ở terminal khác):
@@ -12,18 +12,24 @@ Cách chạy (cần auth_server.py đang chạy ở terminal khác):
 from __future__ import annotations
 
 import asyncio
+import os
 
-import httpx
+import httpx2
 
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-SERVER_URL = "http://localhost:8000/mcp"
-TOKEN = "dev-token-abc123"
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8000/mcp")
+TOKEN = os.getenv("MCP_AUTH_TOKEN", "dev-token-abc123")
 
 
 async def main() -> None:
-    http_client = httpx.AsyncClient(
+    http_client = httpx2.AsyncClient(
         headers={"Authorization": f"Bearer {TOKEN}"},
     )
 

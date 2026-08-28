@@ -7,23 +7,23 @@ import os
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 def check_environment():
     """Check if .env file exists and is configured"""
     print("🔍 Checking environment configuration...")
     
-    env_file = Path(".env")
-    if not env_file.exists():
-        print("❌ .env file not found")
-        print("   Run: echo 'GOOGLE_API_KEY=your_key' > .env")
-        return False
-    
-    # Check if GOOGLE_API_KEY is set
+    env_file = Path(__file__).with_name(".env")
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(env_file)
     
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key or api_key == "your_google_api_key_here":
-        print("❌ GOOGLE_API_KEY not configured in .env")
+        if not env_file.exists():
+            print("❌ .env file not found")
+        else:
+            print("❌ GOOGLE_API_KEY not configured in .env")
         print("   Get key from: https://aistudio.google.com/apikey")
         return False
     
@@ -38,7 +38,7 @@ def check_dependencies():
         ("google.adk", "Google ADK"),
         ("google.generativeai", "Google Generative AI"),
         ("mcp", "MCP"),
-        ("fastmcp", "FastMCP"),
+        ("mcp.server.fastmcp", "FastMCP (MCP 1.x)"),
         ("dotenv", "python-dotenv"),
         ("httpx", "httpx"),
     ]
@@ -54,7 +54,6 @@ def check_dependencies():
     
     if not all_installed:
         print("\n   Install with: uv sync")
-        print("   Or: pip install google-adk google-generativeai mcp fastmcp python-dotenv httpx")
     
     return all_installed
 
@@ -82,7 +81,7 @@ def check_mcp_server():
     """Check if MCP server is accessible"""
     print("\n🔍 Checking MCP server connectivity...")
     
-    server_url = "https://weather-mcp-server-oze7nwnjba-as.a.run.app"
+    server_url = os.getenv("MCP_SERVER_URL", "http://localhost:8085/mcp")
     
     try:
         import httpx
@@ -95,7 +94,7 @@ def check_mcp_server():
         
         status_code = asyncio.run(test_connection())
         
-        if status_code in [200, 404]:  # 404 is expected for GET on MCP endpoint
+        if status_code in [200, 404, 405]:  # GET thường không được hỗ trợ ở /mcp
             print(f"✅ MCP server reachable at {server_url}")
             return True
         else:

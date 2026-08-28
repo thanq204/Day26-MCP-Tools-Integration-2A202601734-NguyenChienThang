@@ -36,6 +36,9 @@ AI agent built with **Google Agent Development Kit (ADK)** that uses tools from 
 
 ## Quick Start
 
+> This client pins MCP 1.x for compatibility with the installed Google ADK
+> release. The root production examples use MCP 2.x independently.
+
 ### 1. Start the MCP Server
 
 ```bash
@@ -103,7 +106,7 @@ connection_params = StreamableHTTPConnectionParams(
 
 root_agent = Agent(
     name="weather_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     tools=[weather_tools],
 )
 ```

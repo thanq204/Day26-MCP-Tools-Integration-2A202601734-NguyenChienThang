@@ -25,23 +25,35 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
-import httpx
+import httpx2
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 REGISTRY_PATH = Path(__file__).parent / "registry.json"
+
+
+def _version_key(version: str) -> tuple[int, ...]:
+    """Chuyển semantic version thành tuple số để so sánh đúng 1.10 > 1.9."""
+    numbers = tuple(int(part) for part in re.findall(r"\d+", version))
+    if not numbers:
+        raise ValueError(f"Version không hợp lệ: {version!r}")
+    return numbers
 
 
 class ToolRegistry:
     """Danh mục trung tâm — agent tra cứu tool theo tag, tên, hoặc mô tả."""
 
     def __init__(self, path: Path = REGISTRY_PATH) -> None:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
         self.tools: dict[str, dict] = data["tools"]
         self.servers: dict[str, dict] = data["servers"]
@@ -78,7 +90,7 @@ class ToolRegistry:
             raise KeyError(f"Không tìm thấy tool (tag={tag}, keyword={keyword})")
         active = [r for r in results if not r["deprecated"]]
         candidates = active or results
-        return max(candidates, key=lambda r: r["version"])
+        return max(candidates, key=lambda r: _version_key(r["version"]))
 
 
 async def connect_and_call(match: dict, tool_args: dict) -> str:
@@ -88,8 +100,9 @@ async def connect_and_call(match: dict, tool_args: dict) -> str:
 
     if server.get("transport") == "stdio":
         params = StdioServerParameters(
-            command=sys.executable,
+            command=sys.executable if server.get("command") == "python" else server["command"],
             args=server["args"],
+            cwd=REGISTRY_PATH.parent,
         )
         async with stdio_client(params) as (read, write):
             async with ClientSession(read, write) as session:
@@ -104,9 +117,9 @@ async def connect_and_call(match: dict, tool_args: dict) -> str:
             token = os.environ.get(auth_cfg["token_env"], "dev-token-abc123")
             headers["Authorization"] = f"Bearer {token}"
 
-        async with httpx.AsyncClient(headers=headers) as http_client:
+        async with httpx2.AsyncClient(headers=headers) as http_client:
             async with streamable_http_client(server["url"], http_client=http_client) as (
-                read, write, _,
+                read, write,
             ):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
